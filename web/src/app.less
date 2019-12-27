@@ -1,0 +1,69 @@
+body {
+  position: fixed;
+
+  display: flex;
+
+  height: 100%;
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-y: auto;
+}
+
+gui {
+  display: flex;
+
+  flex: 1 1 auto;
+}
+
+word-counts {
+  display: block;
+
+  flex: 1 1 auto;
+
+  word-count {
+    display: block;
+  }
+}
+
+tweets {
+  display: block;
+
+  flex: 1 1 auto;
+}
+
+tweet {
+  display: block;
+
+  padding: 0.25em;
+
+  text {
+    display: block;
+
+    padding: 0.125em;
+    margin: 0.125em;
+  }
+
+  author {
+    display: inline-block;
+
+    padding: 0.125em;
+    margin: 0.125em;
+
+    margin-left: 2em;
+  }
+}
+
+tweet {
+  background-color: rgba(192, 192, 255, 1);
+
+  text {
+    background-color: rgba(255, 255, 255, 1);
+  }
+
+  author {
+    background-color: rgba(255, 255, 255, 1);
+  }
+}

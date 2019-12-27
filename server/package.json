@@ -38,6 +38,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "twitter-stream-api": "^0.5.2"
+    "twitter-stream-api": "^0.5.2",
+    "ws": "^7.2.1"
   }
 }
