@@ -33,7 +33,10 @@ const commonWords = {
   'at': true, 
   'for': true,
   ' ': true,
-  '&': true
+  '&': true,
+  'with': true,
+  'can': true,
+  'his': true
  };
 
 const nSkipWordPairCounts = {0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}};
@@ -81,6 +84,10 @@ const INIT = (_, mutation) => {
 
   _.orderedWordCounts = [];
 
+  _.scale = 1000;
+
+  setInterval(mutation(_ => _), 60 * 1000);
+
   NOTIFY_TWEETS = tweets => {
     mutation(() => {
       _.tweets = tweets;
@@ -110,16 +117,24 @@ const INIT = (_, mutation) => {
   return _;
 };
 
+const SET_SCALE = (_, event) => (_.scale = parseInt(event.target.value), _);
+
 const INIT_GUI = ({}, {inited, mutation}) => inited ? <GUI /> : mutation(INIT)(mutation); 
  
-
-const GUI = ({}) => (
+const GUI = ({}, {scale, mutation}) => (
   <gui> 
     <WordCounts />
     <tweet-container>
+      <controls>
+        <input type="range" min={100} max={10000} step={10} value={scale} onInput={mutation(SET_SCALE)}/>
+      </controls>
       <scale>
-        <ten-minutes style={`top:${(new Date().getTime() - (new Date().getTime() - (10 * 60 * 1000))) / 3000}px;`}>ten minutes ago</ten-minutes>
-        <thirty-minutes style={`top:${(new Date().getTime() - (new Date().getTime() - (30 * 60 * 1000))) / 3000}px;`}>thirty minutes ago</thirty-minutes>
+        <ten-minutes style={`top:${(new Date().getTime() - (new Date().getTime() - (10 * 60 * 1000))) / scale}px;`}>ten minutes ago</ten-minutes>
+        <thirty-minutes style={`top:${(new Date().getTime() - (new Date().getTime() - (30 * 60 * 1000))) / scale}px;`}>thirty minutes ago</thirty-minutes>
+        <two-hours style={`top:${(new Date().getTime() - (new Date().getTime() - (2 * 60 * 60 * 1000))) / scale}px;`}>two hours ago</two-hours>
+        <five-hours style={`top:${(new Date().getTime() - (new Date().getTime() - (5 * 60 * 60 * 1000))) / scale}px;`}>five hours ago</five-hours>
+        <twelve-hours style={`top:${(new Date().getTime() - (new Date().getTime() - (12 * 60 * 60 * 1000))) / scale}px;`}>twelve hours ago</twelve-hours>
+        <one-day style={`top:${(new Date().getTime() - (new Date().getTime() - (24 * 60 * 60 * 1000))) / scale}px;`}>one day ago</one-day>
       </scale>
       <Tweets />
     </tweet-container>
@@ -134,14 +149,20 @@ const WordCounts = ({}, {orderedWordCounts}) => (
   </word-counts>
 );
 
-const Tweets = ({}, {tweets}) => (
-  <tweets style={`height: ${tweets.length === 0 ? 0 : ((new Date().getTime() - tweets[0].logTime) / 3000)}px;`}>
+const PairCounts = () => (
+  <pair-counts>
+
+  </pair-counts>
+);
+
+const Tweets = ({}, {tweets, scale}) => (
+  <tweets style={`height: ${tweets.length === 0 ? 0 : ((new Date().getTime() - tweets[0].logTime) / scale)}px;`}>
     {tweets.map(t => <Tweet tweet={t} />)}
   </tweets>
 );
 
-const Tweet = ({tweet: {author, text, logTime}}) => (
-  <tweet style={`top: ${(new Date().getTime() - logTime)/3000}px;left:${2 + (Math.sin(logTime) + 1) * 25}%;`}>
+const Tweet = ({tweet: {author, text, logTime}}, {scale}) => (
+  <tweet style={`top: ${(new Date().getTime() - logTime)/scale}px;left:${2 + (Math.sin(logTime) + 1) * 25}%;`}>
     <text>{text}</text>
     <author>{author}</author>
   </tweet>

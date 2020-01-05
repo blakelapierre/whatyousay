@@ -108,7 +108,7 @@ Twitter.on('data', data => {
 
     console.log(`${author}: ${text}`);
 
-    sendToWebSockets(['tweet', {author, text}]);
+    sendToWebSockets(['tweet', {author, text, logTime: new Date().getTime()}]);
 
     logWords(text);
     logTweet(author, text);
