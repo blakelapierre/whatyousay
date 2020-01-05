@@ -117,6 +117,10 @@ const GUI = ({}) => (
   <gui> 
     <WordCounts />
     <tweet-container>
+      <scale>
+        <ten-minutes style={`top:${(new Date().getTime() - (new Date().getTime() - (10 * 60 * 1000))) / 3000}px;`}>ten minutes ago</ten-minutes>
+        <thirty-minutes style={`top:${(new Date().getTime() - (new Date().getTime() - (30 * 60 * 1000))) / 3000}px;`}>thirty minutes ago</thirty-minutes>
+      </scale>
       <Tweets />
     </tweet-container>
   </gui>
@@ -131,13 +135,13 @@ const WordCounts = ({}, {orderedWordCounts}) => (
 );
 
 const Tweets = ({}, {tweets}) => (
-  <tweets style={`height: ${tweets.length === 0 ? 0 : ((new Date().getTime() - tweets[0].logTime) / 5000)}px;`}>
-    {tweets.map(t => <Tweet tweet={t} />).reverse()}
+  <tweets style={`height: ${tweets.length === 0 ? 0 : ((new Date().getTime() - tweets[0].logTime) / 3000)}px;`}>
+    {tweets.map(t => <Tweet tweet={t} />)}
   </tweets>
 );
 
 const Tweet = ({tweet: {author, text, logTime}}) => (
-  <tweet style={`top: ${(new Date().getTime() - logTime)/5000}px;`}>
+  <tweet style={`top: ${(new Date().getTime() - logTime)/3000}px;left:${2 + (Math.sin(logTime) + 1) * 25}%;`}>
     <text>{text}</text>
     <author>{author}</author>
   </tweet>
