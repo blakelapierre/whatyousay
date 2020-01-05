@@ -19,22 +19,36 @@ gui {
 }
 
 word-counts {
-  display: block;
+  flex: 0 0 auto;
 
-  flex: 1 1 auto;
+  max-width: 33%;
+
+  overflow-y: auto;
 
   word-count {
-    display: block;
+    display: table-row;
+
+    word, count { display: table-cell; }
   }
 }
 
+tweet-container {
+  flex: 1 1 auto;
+
+  overflow-y: auto;
+}
+
 tweets {
+  position: relative;
+  
   display: block;
 
-  flex: 1 1 auto;
+  width: 100%;
 }
 
 tweet {
+  position: absolute;
+
   display: block;
 
   padding: 0.25em;

@@ -4,19 +4,36 @@ const ws = new WebSocket(`ws:\\${location.hostname}:7331`);
 
 const commonWords = {
   'the': true, 
-  'I': true, 
+  'i': true, 
   'to': true, 
   'they': true,
   'this': true, 
   'and': true, 
   'of': true, 
   'a': true, 
-  'in': true, 
+  'in': true,
+  'is': true,
+  'our': true,
+  'on': true,
+  'or': true,
+  'all': true,
+  'my': true,
+  'we': true,
+  'it': true,
+  'has': true,
+  'that': true,
+  'from': true,
+  'was': true,
+  'are': true,
+  'will': true,
+  'have': true, 
   'be': true,
   'by': true,
   'as': true, 
   'at': true, 
-  'for': true
+  'for': true,
+  ' ': true,
+  '&': true
  };
 
 const nSkipWordPairCounts = {0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}};
@@ -24,6 +41,8 @@ const wordCounts = {};
 const tweetCounts = {};
 const tweets = [];
 let NOTIFY_TWEETS, NOTIFY_NEW_TWEET;
+
+const textDecoder = document.createElement('span');
 
 ws.addEventListener('message', event => {
   console.log('message', event);
@@ -36,7 +55,8 @@ ws.addEventListener('message', event => {
 });
 
 function logWords (text) {
-  const words = text.split(' '); // may be other kinds of words, should maybe check for
+  textDecoder.innerHTML = text;
+  const words = textDecoder.innerText.split(' '); // may be other kinds of words, should maybe check for
 
   words.forEach(word => (wordCounts[word] = (wordCounts[word] || 0) + 1));
 
@@ -84,7 +104,7 @@ const INIT = (_, mutation) => {
   };
 
   function orderWordCounts() {
-    _.orderedWordCounts = Object.keys(_.wordCounts).filter(word => !commonWords[word]).map(word => ({word, count: _.wordCounts[word]})).sort((a, b) => a.count > b.count ? -1 : 1);
+    _.orderedWordCounts = Object.keys(_.wordCounts).filter(word => !commonWords[word.toLowerCase()]).map(word => ({word, count: _.wordCounts[word]})).sort((a, b) => a.count > b.count ? -1 : 1);
   }
 
   return _;
@@ -96,24 +116,28 @@ const INIT_GUI = ({}, {inited, mutation}) => inited ? <GUI /> : mutation(INIT)(m
 const GUI = ({}) => (
   <gui> 
     <WordCounts />
-    <Tweets />
+    <tweet-container>
+      <Tweets />
+    </tweet-container>
   </gui>
 );
 
 const WordCounts = ({}, {orderedWordCounts}) => (
   <word-counts>
-    {orderedWordCounts.map(({word, count}) => <word-count><word>{word}</word><count>{count}</count></word-count>)}
+    <table>
+      {orderedWordCounts.map(({word, count}) => <word-count><count>{count}</count><word>{word}</word></word-count>)}
+    </table>
   </word-counts>
 );
 
 const Tweets = ({}, {tweets}) => (
-  <tweets>
+  <tweets style={`height: ${tweets.length === 0 ? 0 : ((new Date().getTime() - tweets[0].logTime) / 5000)}px;`}>
     {tweets.map(t => <Tweet tweet={t} />).reverse()}
   </tweets>
 );
 
-const Tweet = ({tweet: {author, text}}) => (
-  <tweet>
+const Tweet = ({tweet: {author, text, logTime}}) => (
+  <tweet style={`top: ${(new Date().getTime() - logTime)/5000}px;`}>
     <text>{text}</text>
     <author>{author}</author>
   </tweet>

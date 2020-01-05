@@ -1,3 +1,15 @@
+// https://stackoverflow.com/a/49392671
+import * as process from 'process';
+
+[`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach(event => {
+  process.addListener(event, cleanUpServer);
+});
+
+function cleanUpServer () {
+  saveData();
+  return true;
+}
+
 const {
   CONSUMER_API_KEY,
   CONSUMER_API_SECRET,
@@ -25,8 +37,12 @@ const follow = [
 import * as TS from 'twitter-stream-api';
 import * as ws from 'ws';
 
+import * as fs from 'fs';
+
 const Twitter = new TS(keys, false);
 const Server = new ws.Server({port: port || 7331});
+
+console.log('listening on', port || 7331);
 
 const wordCounts = {};
 const tweetCounts = {};
@@ -34,7 +50,36 @@ const tweets = []; // store ids as key?
 
 const nSkipWordPairCounts = {0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}};
 
-Twitter.stream('statuses/filter', {follow: follow.join(',')});
+loadData();
+
+function saveData() {
+  const data = {
+    wordCounts,
+    tweetCounts,
+    tweets,
+    nSkipWordPairCounts
+  };
+
+  return fs.writeFileSync('tweet_data', JSON.stringify(data));
+}
+
+function loadData() {
+  try {
+    const data = JSON.parse(fs.readFileSync('tweet_data').toString());
+
+    Object.assign(wordCounts, data.wordCounts);
+    Object.assign(tweetCounts, data.tweetCounts);
+    Object.assign(nSkipWordPairCounts, data.nSkipWordPairCounts);
+    tweets.push(...data.tweets);
+
+    console.log('data loaded');
+  }
+  catch (e) {
+    console.log('error loading data', e);
+  }
+}
+
+Twitter.stream('statuses/filter', {follow: follow.join(','), tweet_mode: 'extended'});
 
 Twitter.on('connection success', event => {
   console.log('connected', event);
@@ -50,15 +95,16 @@ Twitter.on('data', data => {
       const id_str = d.delete.status.id_str;
 
       if (tweets[id_str]) {
-       // delete tweets[id_str];
+        delete tweets[id_str];
         sendToWebSockets(['delete', id_str]);
       }
     }
   }
 
-  else if (follow.indexOf(d.user.id_str) >= 0) {
+  else if (follow.indexOf(d.user.id_str) >= 0 && d.extended_tweet) {
+    console.log(d);
     const author = d.user.name;
-    const text = d.text;
+    const text = d.extended_tweet.full_text;
 
     console.log(`${author}: ${text}`);
 
@@ -72,6 +118,8 @@ Twitter.on('data', data => {
 });
 
 Server.on('connection', socket => {
+  console.log('ws connection');
+  console.log('sending tweets', tweets);
   if (socket.readyState === ws.OPEN) socket.send(JSON.stringify(['tweets', tweets]));
 });
 
